@@ -32,9 +32,9 @@ public class Tentacle : MonoBehaviour {
         if (Application.isPlaying)
         {
             Gizmos.color = Color.cyan;
-            for (int i = 0; i < _tentacleData.nodes.Count - 1; i++)
+            for (int i = 0; i < _tentacleData.nodes.Length - 1; i++)
             {
-                Gizmos.DrawLine(_tentacleData.nodes[i].GetVec(), _tentacleData.nodes[i + 1].GetVec());
+                Gizmos.DrawLine(_tentacleData.nodes[i].position(), _tentacleData.nodes[i + 1].position());
             }
         }
     }
@@ -47,19 +47,21 @@ public class Tentacle : MonoBehaviour {
         public float spacing;
         public float friction;
 
-        public List<Node> nodes;
-
+        //public List<Node> nodes;
+        public Node[] nodes;
 
         public TentacleData(float _length, float _spacing, float _friction)
         {
             length = _length;
             spacing = _spacing;
             friction = _friction;
-            nodes = new List<Node>();
-            for (var i = 0; i < _length; i++)
-            {
-                nodes.Add(new Node());
-            }
+            //nodes = new List<Node>();
+            nodes = new Node[(int)_length];
+
+            //for (var i = 0; i < _length; i++)
+            //{
+            //    nodes.Add(new Node());
+            //}
         }
         public void Move(Vector2 _position)
         {
@@ -72,67 +74,79 @@ public class Tentacle : MonoBehaviour {
             var i = 0;
             var px = 0f;
             var py = 0f;
-            var node = new Node();
-            var prev = nodes[0];
+            //var node = new Node();
+            int prev = 0;
 
             for (i = 1; i < length; i++)
             {
-                node = nodes[i];
+                //node = nodes[i];
 
-                node.x += node.vx;
-                node.y += node.vy;
+                nodes[i].x += nodes[i].vx;
+                nodes[i].y += nodes[i].vy;
 
                 //much more understandable, but when using a vector the rope doesn't unfold when origin is at (0,0,0) 
-                Vector2 dir = new Vector2(prev.x, prev.y) - new Vector2(node.x, node.y);
+                Vector2 dir = new Vector2(nodes[prev].x, nodes[prev].y) - new Vector2(nodes[i].x, nodes[i].y);
                 dir.Normalize();
-                px = node.x + dir.x * spacing * _length;
-                py = node.y + dir.y * spacing * _length;
+                px = nodes[i].x + dir.x * spacing * _length;
+                py = nodes[i].y + dir.y * spacing * _length;
 
-                node.x = prev.x - (px - node.x);
-                node.y = prev.y - (py - node.y);
+                nodes[i].x = nodes[prev].x - (px - nodes[i].x);
+                nodes[i].y = nodes[prev].y - (py - nodes[i].y);
 
-                node.vx = node.x - node.ox;
-                node.vy = node.y - node.oy;
+                nodes[i].vx = nodes[i].x - nodes[i].ox;
+                nodes[i].vy = nodes[i].y - nodes[i].oy;
 
-                node.vx *= friction * (1 - _friction);
-                node.vy *= friction * (1 - _friction);
+                nodes[i].vx *= friction * (1 - _friction);
+                nodes[i].vy *= friction * (1 - _friction);
 
-                node.vx += _wind;
-                node.vy += _gravity;
+                nodes[i].vx += _wind;
+                nodes[i].vy += _gravity;
 
-                node.ox = node.x;
-                node.oy = node.y;
+                nodes[i].ox = nodes[i].x;
+                nodes[i].oy = nodes[i].y;
 
-                prev = node;
+                prev = i;
             }
         }
     }
     #endregion
 
     #region Node
-    //[System.SerializableAttribute]
-    public class Node
+    //public class Node
+    //{
+    //    public float x;
+    //    public float y;
+
+    //    public float ox;
+    //    public float oy;
+
+    //    public float vx;
+    //    public float vy;
+
+    //    public Node() { }
+
+    //    public Vector2 position()
+    //    {
+    //        return new Vector2(x, y);
+    //    }
+    //}
+
+    public struct Node
     {
         public float x;
         public float y;
+
         public float ox;
         public float oy;
+
         public float vx;
         public float vy;
-        public Node(float _x, float _y)
-        {
-            x = _x;
-            y = _y;
-            ox = _x;
-            oy = _y;
-        }
-        public Node() { }
-        public Vector2 GetVec()
+
+        public Vector2 position()
         {
             return new Vector2(x, y);
         }
     }
     #endregion
-    
-    
+
 }
