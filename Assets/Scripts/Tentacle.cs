@@ -9,7 +9,6 @@ public class Tentacle : MonoBehaviour {
 		public float radius ;
 		public float spacing ;
 		public float friction ;
-		// public float shade ;
 
 		public List<Node> nodes ;
 
@@ -19,7 +18,6 @@ public class Tentacle : MonoBehaviour {
 			radius = _radius ;
 			spacing = _spacing ;
 			friction = _friction ;
-			// shade = _shade ;
 			nodes = new List<Node>() ;
 			for(var i = 0 ; i < _length ; i++ ) {
 				nodes.Add(new Node() );
@@ -31,10 +29,6 @@ public class Tentacle : MonoBehaviour {
 		}
 		public void Update(float _radius , float _length , float _friction , float _wind , float _gravity) {
 			var i = 0 ;
-			var j = 0 ;
-			// var n = 0;
-			var s = 0f;
-			var c = 0f;
 			var dx = 0f;
 			var dy = 0f;
 			var da = 0f;
@@ -45,7 +39,7 @@ public class Tentacle : MonoBehaviour {
 			
 			_radius = radius * _radius ;
 			var step = _radius/length ;
-			for(j = 0 , i = 1 ; i < length ; i++ , j++) {
+			for(i = 1 ; i < length ; i++) {
 				node = nodes[i] ;
 
 				node.x += node.vx ;
@@ -72,11 +66,6 @@ public class Tentacle : MonoBehaviour {
 				
 				node.ox = node.x ;
 				node.oy = node.y ;
-
-				s = Mathf.Sin(da + 1.57079632679489661923f) ;
-				c = Mathf.Cos(da + 1.57079632679489661923f) ;
-
-				//
 
 				radius -= step ;
 				prev = node ;
@@ -105,14 +94,14 @@ public class Tentacle : MonoBehaviour {
 	public float CustomLength ;
 	public TentacleData _tentacleData ;
 	void Start () {
-		// StartParts() ;
+
 		_setting = new Setting(10 , 5 , 0.5f , -0.5f ,0.02f , 2f) ;
 		_tentacleData = new TentacleData(20 , 2 , 0.5f , 0.2f);
 
 	}
 	public GameObject origin ;
 	void Update() {
-		// UpdateParts() ;
+
 		_tentacleData.Move(origin.transform.position) ;
 		_tentacleData.Update(_setting.radius , _setting.length , _setting.friction, _setting.wind , _setting.gravity) ;
 
