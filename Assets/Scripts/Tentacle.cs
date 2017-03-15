@@ -33,10 +33,13 @@ public class Tentacle : MonoBehaviour {
 
     void OnDrawGizmos()
     {
-        Gizmos.color = Color.cyan;
-        for (int i = 0; i < _tentacleData.nodes.Count - 1; i++)
+        if (Application.isPlaying)
         {
-            Gizmos.DrawLine(_tentacleData.nodes[i].GetVec(), _tentacleData.nodes[i + 1].GetVec());
+            Gizmos.color = Color.cyan;
+            for (int i = 0; i < _tentacleData.nodes.Count - 1; i++)
+            {
+                Gizmos.DrawLine(_tentacleData.nodes[i].GetVec(), _tentacleData.nodes[i + 1].GetVec());
+            }
         }
     }
 
@@ -155,7 +158,6 @@ public class Tentacle : MonoBehaviour {
 			gravity = _gravity ;
 			wind = _wind ;
 			friction = _friction ;
-			thickness = _thickness ;
 		}
 	}
     #endregion
