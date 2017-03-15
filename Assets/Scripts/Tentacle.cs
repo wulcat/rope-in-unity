@@ -3,30 +3,28 @@ using System.Collections.Generic;
 
 public class Tentacle : MonoBehaviour {
 
-	
 
-	
 	public TentacleData _tentacleData;
-    public Setting _setting;
 
     public GameObject origin;
 
-    public float nodeCount = 10;
+    public int nodeCount = 10;
+    public float nodeSpacing = 0.5f;
     public float gravity = -0.5f;
     public float windForce = 0f;
     public float friction = 0.02f;
 
     void Start () {
 
-		_setting = new Setting(nodeCount, gravity , windForce ,friction) ;
-		_tentacleData = new TentacleData(20 , 2 , 0.5f , 0.2f);
+		//_setting = new Setting(nodeCount, gravity , windForce ,friction) ;
+		_tentacleData = new TentacleData(nodeCount, nodeSpacing , 0.2f);
 
 	}
 
 	void Update() {
 
-		_tentacleData.Move(origin.transform.position) ;
-		_tentacleData.Update(_setting.length , _setting.friction, _setting.wind , _setting.gravity) ;
+		_tentacleData.Move(origin.transform.position);
+		_tentacleData.Update(nodeCount , friction, windForce , gravity);
 
 	}
 
@@ -47,17 +45,15 @@ public class Tentacle : MonoBehaviour {
     public class TentacleData
     {
         public float length;
-        public float radius;
         public float spacing;
         public float friction;
 
         public List<Node> nodes;
 
 
-        public TentacleData(float _length, float _radius, float _spacing, float _friction)
+        public TentacleData(float _length, float _spacing, float _friction)
         {
             length = _length;
-            radius = _radius;
             spacing = _spacing;
             friction = _friction;
             nodes = new List<Node>();
@@ -138,23 +134,6 @@ public class Tentacle : MonoBehaviour {
         }
     }
     #endregion
-
-    #region Settings
-    //[System.SerializableAttribute]
-	public class Setting {
-		public float length ;
-		public float gravity ;
-		public float wind ;
-		public float friction ;
-		public float thickness ;
-		public Setting(float _length, float _gravity , float _wind , float _friction) {
-			length = _length ;
-			gravity = _gravity ;
-			wind = _wind ;
-			friction = _friction ;
-		}
-	}
-    #endregion
-
+    
     
 }
