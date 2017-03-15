@@ -12,14 +12,13 @@ public class Tentacle : MonoBehaviour {
     public GameObject origin;
 
     public float nodeCount = 10;
-    public float radius = 5;
-    public float gravity = 0.5f;
+    public float gravity = -0.5f;
     public float windForce = 0f;
     public float friction = 0.02f;
 
     void Start () {
 
-		_setting = new Setting(nodeCount , radius , gravity , windForce ,friction) ;
+		_setting = new Setting(nodeCount, gravity , windForce ,friction) ;
 		_tentacleData = new TentacleData(20 , 2 , 0.5f , 0.2f);
 
 	}
@@ -27,7 +26,7 @@ public class Tentacle : MonoBehaviour {
 	void Update() {
 
 		_tentacleData.Move(origin.transform.position) ;
-		_tentacleData.Update(_setting.radius , _setting.length , _setting.friction, _setting.wind , _setting.gravity) ;
+		_tentacleData.Update(_setting.length , _setting.friction, _setting.wind , _setting.gravity) ;
 
 	}
 
@@ -72,7 +71,7 @@ public class Tentacle : MonoBehaviour {
             nodes[0].x = _position.x;
             nodes[0].y = _position.y;
         }
-        public void Update(float _radius, float _length, float _friction, float _wind, float _gravity)
+        public void Update(float _length, float _friction, float _wind, float _gravity)
         {
 
             var i = 0;
@@ -81,8 +80,6 @@ public class Tentacle : MonoBehaviour {
             var node = new Node();
             var prev = nodes[0];
 
-            _radius = radius * _radius;
-            var step = _radius / length;
             for (i = 1; i < length; i++)
             {
                 node = nodes[i];
@@ -111,7 +108,6 @@ public class Tentacle : MonoBehaviour {
                 node.ox = node.x;
                 node.oy = node.y;
 
-                radius -= step;
                 prev = node;
             }
         }
@@ -147,14 +143,12 @@ public class Tentacle : MonoBehaviour {
     //[System.SerializableAttribute]
 	public class Setting {
 		public float length ;
-		public float radius ;
 		public float gravity ;
 		public float wind ;
 		public float friction ;
 		public float thickness ;
-		public Setting(float _length , float _radius , float _gravity , float _wind , float _friction) {
+		public Setting(float _length, float _gravity , float _wind , float _friction) {
 			length = _length ;
-			radius = _radius ;
 			gravity = _gravity ;
 			wind = _wind ;
 			friction = _friction ;
