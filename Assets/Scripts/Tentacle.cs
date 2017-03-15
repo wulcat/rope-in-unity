@@ -16,8 +16,7 @@ public class Tentacle : MonoBehaviour {
 
     void Start () {
 
-		//_setting = new Setting(nodeCount, gravity , windForce ,friction) ;
-		_tentacleData = new TentacleData(nodeCount, nodeSpacing , 0.2f);
+		_tentacleData = new TentacleData(nodeCount, nodeSpacing , friction);
 
 	}
 
