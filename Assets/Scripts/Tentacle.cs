@@ -28,10 +28,8 @@ public class Tentacle : MonoBehaviour {
 			nodes[0].y = _position.y ;
 		}
 		public void Update(float _radius , float _length , float _friction , float _wind , float _gravity) {
-			var i = 0 ;
-			var dx = 0f;
-			var dy = 0f;
-			var da = 0f;
+
+            var i = 0 ;
 			var px = 0f;
 			var py = 0f;
 			var node = new Node() ;
@@ -45,14 +43,13 @@ public class Tentacle : MonoBehaviour {
 				node.x += node.vx ;
 				node.y += node.vy ;
 
-				dx = prev.x - node.x ;
-				dy = prev.y - node.y ;
-				da = Mathf.Atan2(dy , dx) ;
+                //much more understandable, but when using a vector the rope doesn't unfold when origin is at (0,0,0) 
+                Vector2 dir = new Vector2(prev.x, prev.y) - new Vector2(node.x, node.y);
+                dir.Normalize();
+                px = node.x + dir.x * spacing * _length;
+                py = node.y + dir.y * spacing * _length;
 
-				px = node.x + Mathf.Cos(da) * spacing * _length ;
-				py = node.y + Mathf.Sin(da) * spacing * _length ;
-
-				node.x = prev.x - (px - node.x) ;
+                node.x = prev.x - (px - node.x) ;
 				node.y = prev.y - (py - node.y) ;
 
 				node.vx = node.x - node.ox ;
