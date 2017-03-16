@@ -113,9 +113,9 @@ public class Rope : MonoBehaviour {
             //much more understandable, but when using a vector the rope doesn't unfold when origin is at (0,0,0) 
             Vector3 dir = new Vector3(nodes[previousNodeIndex].x, nodes[previousNodeIndex].y, nodes[previousNodeIndex].z) - new Vector3(nodes[i].x, nodes[i].y, nodes[i].z);
             dir.Normalize();
-            px = nodes[i].x + dir.x * nodeSpacing * nodeCount;
-            py = nodes[i].y + dir.y * nodeSpacing * nodeCount;
-            pz = nodes[i].z + dir.z * nodeSpacing * nodeCount;
+            px = nodes[i].x + dir.x * nodeSpacing;
+            py = nodes[i].y + dir.y * nodeSpacing;
+            pz = nodes[i].z + dir.z * nodeSpacing;
 
             nodes[i].x = nodes[previousNodeIndex].x - (px - nodes[i].x);
             nodes[i].y = nodes[previousNodeIndex].y - (py - nodes[i].y);
