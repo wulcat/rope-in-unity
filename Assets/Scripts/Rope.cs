@@ -7,17 +7,31 @@ public class Rope : MonoBehaviour {
 
     public Transform anchor1, anchor2;
 
+    LineRenderer lineRenderer;
+
     public int nodeCount = 10;
     public float nodeSpacing = 0.5f;
     public float gravity = -0.5f;
-    public float windForce = 0f;
+    public Vector3 windForce = Vector3.zero;
     public float friction = 0.02f;
 
+    public bool drawGizmo = false;
+
     void Start () {
+
+        lineRenderer = GetComponent<LineRenderer>();
 
         ropeData = new RopeData(nodeCount);
         ropeData.SetAnchor(0, true);
         ropeData.SetAnchor(nodeCount-1, true);
+
+        //nodePrefabs = new Transform[nodeCount];
+        //for(int i = 0; i < nodeCount; i++)
+        //{
+        //    nodePrefabs[i] = Instantiate(nodePrefab, ropeData.nodes[i].position(), nodePrefab.rotation);
+        //}
+
+        lineRenderer.numPositions = nodeCount;
     }
 
 	void Update() {
@@ -26,11 +40,19 @@ public class Rope : MonoBehaviour {
         ropeData.MoveNode(anchor2.position, nodeCount-1);
         ropeData.UpdateNodes(nodeSpacing, gravity, friction, windForce);
 
-	}
+        //for (int i = 0; i < nodeCount; i++)
+        //{
+        //    nodePrefabs[i].position = ropeData.nodes[i].position();
+        //}
+        for (int i = 0; i < nodeCount; i++)
+        {
+            lineRenderer.SetPosition(i, ropeData.nodes[i].position());
+        }
+    }
 
     void OnDrawGizmos()
     {
-        if (Application.isPlaying)
+        if (Application.isPlaying && drawGizmo)
         {
             Gizmos.color = Color.cyan;
             for (int i = 0; i < ropeData.nodes.Length - 1; i++)
@@ -47,7 +69,9 @@ public class Rope : MonoBehaviour {
         float nodeSpacing;
         float gravity;
         float friction;
-        float windForce;
+        Vector3 windForce;
+
+        int previousNodeIndex;
 
         public Node[] nodes;
 
@@ -55,13 +79,13 @@ public class Rope : MonoBehaviour {
         {
             nodeCount = _nodeCount;
             nodes = new Node[nodeCount];
-
         }
 
-        public void MoveNode(Vector2 _position, int _nodeIndex)
+        public void MoveNode(Vector3 _position, int _nodeIndex)
         {
             nodes[_nodeIndex].x = _position.x;
             nodes[_nodeIndex].y = _position.y;
+            nodes[_nodeIndex].z = _position.z;
         }
 
         public void SetAnchor(int _nodeIndex, bool _isAnchor)
@@ -69,86 +93,73 @@ public class Rope : MonoBehaviour {
             nodes[_nodeIndex].isAnchor = _isAnchor;
         }
 
-        public void UpdateNodes(float _nodeSpacing, float _gravity, float _friction, float _windForce)
+        public void UpdateNodes(float _nodeSpacing, float _gravity, float _friction, Vector3 _windForce)
         {
             nodeSpacing = _nodeSpacing;
             gravity = _gravity;
             friction = _friction;
             windForce = _windForce;
 
-            var i = 0;
-            var px = 0f;
-            var py = 0f;
+            previousNodeIndex = 0;
 
-            int previousNodeIndex = 0;
-
-            for (i = 0; i < nodeCount; i++)
+            for (int i = 0; i < nodeCount; i++)
             {
                 if (!nodes[i].isAnchor)
                 {
-                    nodes[i].x += nodes[i].vx;
-                    nodes[i].y += nodes[i].vy;
-
-                    //much more understandable, but when using a vector the rope doesn't unfold when origin is at (0,0,0) 
-                    Vector2 dir = new Vector2(nodes[previousNodeIndex].x, nodes[previousNodeIndex].y) - new Vector2(nodes[i].x, nodes[i].y);
-                    dir.Normalize();
-                    px = nodes[i].x + dir.x * nodeSpacing * nodeCount;
-                    py = nodes[i].y + dir.y * nodeSpacing * nodeCount;
-
-                    nodes[i].x = nodes[previousNodeIndex].x - (px - nodes[i].x);
-                    nodes[i].y = nodes[previousNodeIndex].y - (py - nodes[i].y);
-
-                    nodes[i].vx = nodes[i].x - nodes[i].ox;
-                    nodes[i].vy = nodes[i].y - nodes[i].oy;
-
-                    nodes[i].vx *= friction * (1 - friction);
-                    nodes[i].vy *= friction * (1 - friction);
-
-                    nodes[i].vx += windForce;
-                    nodes[i].vy += gravity;
-
-                    nodes[i].ox = nodes[i].x;
-                    nodes[i].oy = nodes[i].y;
-
-                    previousNodeIndex = i;
+                    ProcessNodes(i);
                 }
             }
 
             //reverse
-
             previousNodeIndex = nodeCount-1;
 
-            for (i = nodeCount-1; i >= 0; i--)
+            for (int i = nodeCount-1; i >= 0; i--)
             {
                 if (!nodes[i].isAnchor)
                 {
-                    nodes[i].x += nodes[i].vx;
-                    nodes[i].y += nodes[i].vy;
-
-                    //much more understandable, but when using a vector the rope doesn't unfold when origin is at (0,0,0) 
-                    Vector2 dir = new Vector2(nodes[previousNodeIndex].x, nodes[previousNodeIndex].y) - new Vector2(nodes[i].x, nodes[i].y);
-                    dir.Normalize();
-                    px = nodes[i].x + dir.x * nodeSpacing * nodeCount;
-                    py = nodes[i].y + dir.y * nodeSpacing * nodeCount;
-
-                    nodes[i].x = nodes[previousNodeIndex].x - (px - nodes[i].x);
-                    nodes[i].y = nodes[previousNodeIndex].y - (py - nodes[i].y);
-
-                    nodes[i].vx = nodes[i].x - nodes[i].ox;
-                    nodes[i].vy = nodes[i].y - nodes[i].oy;
-
-                    nodes[i].vx *= friction * (1 - friction);
-                    nodes[i].vy *= friction * (1 - friction);
-
-                    nodes[i].vx += windForce;
-                    nodes[i].vy += gravity;
-
-                    nodes[i].ox = nodes[i].x;
-                    nodes[i].oy = nodes[i].y;
-
-                    previousNodeIndex = i;
+                    ProcessNodes(i);
                 }
             }
+        }
+
+        void ProcessNodes(int i)
+        {
+            float px = 0f;
+            float py = 0f;
+            float pz = 0f;
+
+            nodes[i].x += nodes[i].vx;
+            nodes[i].y += nodes[i].vy;
+            nodes[i].z += nodes[i].vz;
+
+            //much more understandable, but when using a vector the rope doesn't unfold when origin is at (0,0,0) 
+            Vector3 dir = new Vector3(nodes[previousNodeIndex].x, nodes[previousNodeIndex].y, nodes[previousNodeIndex].z) - new Vector3(nodes[i].x, nodes[i].y, nodes[i].z);
+            dir.Normalize();
+            px = nodes[i].x + dir.x * nodeSpacing;
+            py = nodes[i].y + dir.y * nodeSpacing;
+            pz = nodes[i].z + dir.z * nodeSpacing;
+
+            nodes[i].x = nodes[previousNodeIndex].x - (px - nodes[i].x);
+            nodes[i].y = nodes[previousNodeIndex].y - (py - nodes[i].y);
+            nodes[i].z = nodes[previousNodeIndex].z - (pz - nodes[i].z);
+
+            nodes[i].vx = nodes[i].x - nodes[i].ox;
+            nodes[i].vy = nodes[i].y - nodes[i].oy;
+            nodes[i].vz = nodes[i].z - nodes[i].oz;
+
+            nodes[i].vx *= friction * (1 - friction);
+            nodes[i].vy *= friction * (1 - friction);
+            nodes[i].vz *= friction * (1 - friction);
+
+            nodes[i].vx += windForce.x;
+            nodes[i].vy += gravity + windForce.y;
+            nodes[i].vz += windForce.z;
+
+            nodes[i].ox = nodes[i].x;
+            nodes[i].oy = nodes[i].y;
+            nodes[i].oz = nodes[i].z;
+
+            previousNodeIndex = i;
         }
     }
     #endregion
@@ -158,18 +169,21 @@ public class Rope : MonoBehaviour {
     {
         public float x;
         public float y;
+        public float z;
 
         public float ox;
         public float oy;
+        public float oz;
 
         public float vx;
         public float vy;
+        public float vz;
 
         public bool isAnchor;
 
-        public Vector2 position()
+        public Vector3 position()
         {
-            return new Vector2(x, y);
+            return new Vector3(x, y, z);
         }
     }
     #endregion
