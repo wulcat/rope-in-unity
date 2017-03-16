@@ -13,14 +13,14 @@ public class Rope : MonoBehaviour {
 
     void Start () {
 
-        ropeData = new RopeData(nodeCount, nodeSpacing , friction);
+        ropeData = new RopeData(nodeCount);
 
 	}
 
 	void Update() {
 
-        ropeData.Move(transform.position);
-        ropeData.Update(friction, windForce , gravity);
+        ropeData.MoveNode(transform.position, 1);
+        ropeData.UpdateNodes(nodeSpacing, gravity, friction, windForce);
 
 	}
 
@@ -39,28 +39,33 @@ public class Rope : MonoBehaviour {
     #region Rope
     public class RopeData
     {
-        public int nodeCount;
-        public float spacing;
-        public float friction;
+        int nodeCount;
+        float nodeSpacing;
+        float gravity;
+        float friction;
+        float windForce;
 
         public Node[] nodes;
 
-        public RopeData(int _nodeCount, float _spacing, float _friction)
+        public RopeData(int _nodeCount)
         {
             nodeCount = _nodeCount;
-            spacing = _spacing;
-            friction = _friction;
-
             nodes = new Node[nodeCount];
 
         }
-        public void Move(Vector2 _position)
+
+        public void MoveNode(Vector2 _position, int _nodeIndex)
         {
-            nodes[0].x = _position.x;
-            nodes[0].y = _position.y;
+            nodes[_nodeIndex].x = _position.x;
+            nodes[_nodeIndex].y = _position.y;
         }
-        public void Update(float _friction, float _wind, float _gravity)
+
+        public void UpdateNodes(float _nodeSpacing, float _gravity, float _friction, float _windForce)
         {
+            nodeSpacing = _nodeSpacing;
+            gravity = _gravity;
+            friction = _friction;
+            windForce = _windForce;
 
             var i = 0;
             var px = 0f;
@@ -77,8 +82,8 @@ public class Rope : MonoBehaviour {
                 //much more understandable, but when using a vector the rope doesn't unfold when origin is at (0,0,0) 
                 Vector2 dir = new Vector2(nodes[previousNodeIndex].x, nodes[previousNodeIndex].y) - new Vector2(nodes[i].x, nodes[i].y);
                 dir.Normalize();
-                px = nodes[i].x + dir.x * spacing * nodeCount;
-                py = nodes[i].y + dir.y * spacing * nodeCount;
+                px = nodes[i].x + dir.x * nodeSpacing * nodeCount;
+                py = nodes[i].y + dir.y * nodeSpacing * nodeCount;
 
                 nodes[i].x = nodes[previousNodeIndex].x - (px - nodes[i].x);
                 nodes[i].y = nodes[previousNodeIndex].y - (py - nodes[i].y);
@@ -86,11 +91,11 @@ public class Rope : MonoBehaviour {
                 nodes[i].vx = nodes[i].x - nodes[i].ox;
                 nodes[i].vy = nodes[i].y - nodes[i].oy;
 
-                nodes[i].vx *= friction * (1 - _friction);
-                nodes[i].vy *= friction * (1 - _friction);
+                nodes[i].vx *= friction * (1 - friction);
+                nodes[i].vy *= friction * (1 - friction);
 
-                nodes[i].vx += _wind;
-                nodes[i].vy += _gravity;
+                nodes[i].vx += windForce;
+                nodes[i].vy += gravity;
 
                 nodes[i].ox = nodes[i].x;
                 nodes[i].oy = nodes[i].y;
