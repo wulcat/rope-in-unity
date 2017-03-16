@@ -7,6 +7,9 @@ public class Rope : MonoBehaviour {
 
     public Transform anchor1, anchor2;
 
+    public Transform nodePrefab;
+    Transform[] nodePrefabs;
+
     public int nodeCount = 10;
     public float nodeSpacing = 0.5f;
     public float gravity = -0.5f;
@@ -18,6 +21,12 @@ public class Rope : MonoBehaviour {
         ropeData = new RopeData(nodeCount);
         ropeData.SetAnchor(0, true);
         ropeData.SetAnchor(nodeCount-1, true);
+
+        nodePrefabs = new Transform[nodeCount];
+        for(int i = 0; i < nodeCount; i++)
+        {
+            nodePrefabs[i] = Instantiate(nodePrefab, ropeData.nodes[i].position(), nodePrefab.rotation);
+        }
     }
 
 	void Update() {
@@ -26,7 +35,11 @@ public class Rope : MonoBehaviour {
         ropeData.MoveNode(anchor2.position, nodeCount-1);
         ropeData.UpdateNodes(nodeSpacing, gravity, friction, windForce);
 
-	}
+        for (int i = 0; i < nodeCount; i++)
+        {
+            nodePrefabs[i].position = ropeData.nodes[i].position();
+        }
+    }
 
     void OnDrawGizmos()
     {
