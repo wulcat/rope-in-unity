@@ -7,8 +7,7 @@ public class Rope : MonoBehaviour {
 
     public Transform anchor1, anchor2;
 
-    public Transform nodePrefab;
-    Transform[] nodePrefabs;
+    LineRenderer lineRenderer;
 
     public int nodeCount = 10;
     public float nodeSpacing = 0.5f;
@@ -16,17 +15,23 @@ public class Rope : MonoBehaviour {
     public Vector3 windForce = Vector3.zero;
     public float friction = 0.02f;
 
+    public bool drawGizmo = false;
+
     void Start () {
+
+        lineRenderer = GetComponent<LineRenderer>();
 
         ropeData = new RopeData(nodeCount);
         ropeData.SetAnchor(0, true);
         ropeData.SetAnchor(nodeCount-1, true);
 
-        nodePrefabs = new Transform[nodeCount];
-        for(int i = 0; i < nodeCount; i++)
-        {
-            nodePrefabs[i] = Instantiate(nodePrefab, ropeData.nodes[i].position(), nodePrefab.rotation);
-        }
+        //nodePrefabs = new Transform[nodeCount];
+        //for(int i = 0; i < nodeCount; i++)
+        //{
+        //    nodePrefabs[i] = Instantiate(nodePrefab, ropeData.nodes[i].position(), nodePrefab.rotation);
+        //}
+
+        lineRenderer.numPositions = nodeCount;
     }
 
 	void Update() {
@@ -35,15 +40,19 @@ public class Rope : MonoBehaviour {
         ropeData.MoveNode(anchor2.position, nodeCount-1);
         ropeData.UpdateNodes(nodeSpacing, gravity, friction, windForce);
 
+        //for (int i = 0; i < nodeCount; i++)
+        //{
+        //    nodePrefabs[i].position = ropeData.nodes[i].position();
+        //}
         for (int i = 0; i < nodeCount; i++)
         {
-            nodePrefabs[i].position = ropeData.nodes[i].position();
+            lineRenderer.SetPosition(i, ropeData.nodes[i].position());
         }
     }
 
     void OnDrawGizmos()
     {
-        if (Application.isPlaying)
+        if (Application.isPlaying && drawGizmo)
         {
             Gizmos.color = Color.cyan;
             for (int i = 0; i < ropeData.nodes.Length - 1; i++)
