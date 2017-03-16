@@ -10,7 +10,7 @@ public class Rope : MonoBehaviour {
     public int nodeCount = 10;
     public float nodeSpacing = 0.5f;
     public float gravity = -0.5f;
-    public float windForce = 0f;
+    public Vector3 windForce = Vector3.zero;
     public float friction = 0.02f;
 
     void Start () {
@@ -47,7 +47,7 @@ public class Rope : MonoBehaviour {
         float nodeSpacing;
         float gravity;
         float friction;
-        float windForce;
+        Vector3 windForce;
 
         int previousNodeIndex;
 
@@ -71,7 +71,7 @@ public class Rope : MonoBehaviour {
             nodes[_nodeIndex].isAnchor = _isAnchor;
         }
 
-        public void UpdateNodes(float _nodeSpacing, float _gravity, float _friction, float _windForce)
+        public void UpdateNodes(float _nodeSpacing, float _gravity, float _friction, Vector3 _windForce)
         {
             nodeSpacing = _nodeSpacing;
             gravity = _gravity;
@@ -129,8 +129,9 @@ public class Rope : MonoBehaviour {
             nodes[i].vy *= friction * (1 - friction);
             nodes[i].vz *= friction * (1 - friction);
 
-            nodes[i].vx += windForce;
-            nodes[i].vy += gravity;
+            nodes[i].vx += windForce.x;
+            nodes[i].vy += gravity + windForce.y;
+            nodes[i].vz += windForce.z;
 
             nodes[i].ox = nodes[i].x;
             nodes[i].oy = nodes[i].y;
