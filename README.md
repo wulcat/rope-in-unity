@@ -1,3 +1,3 @@
-# rope-in-unity3d
+# rope-in-unity
 
 Feel free to modiyfy existing code and make pull request .
